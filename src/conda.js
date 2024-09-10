@@ -11,10 +11,11 @@ module.exports = { setupConda };
 // Cache settings
 const CONDA_CACHE_NUMBER = core.getInput("conda-cache-number");
 const SHOWYOUWORK_SPEC = core.getInput("showyourwork-spec");
+const CONDA_PREFIX = core.getInput("conda-installation-path");
 const RUNNER_OS = shell.env["RUNNER_OS"];
 const conda_key = `conda-${constants.conda_cache_version}-${RUNNER_OS}-${CONDA_CACHE_NUMBER}`;
 const conda_restoreKeys = [];
-const conda_paths = ["~/.conda", "~/.condarc", "~/conda_pkgs_dir"];
+let conda_paths = ["~/.conda", "~/.condarc", "~/conda_pkgs_dir"];
 
 // We'll cache the article unless the user set the cache number to `null` (or empty).
 const CACHE_CONDA = (
@@ -27,7 +28,16 @@ const CACHE_CONDA = (
  */
 async function setupConda() {
 
+  if (typeof CONDA_PREFIX === "string" && CONDA_PREFIX.length > 0) {
+    exec("eval '$(${CONDA_PREFIX}/bin/conda shell.bash hook 2> /dev/null)'");
+    exec("conda create --name showyourwork_at_$RUNNER_NAME_from_$GITHUB_REF_NAME python=3.10 pip")
+    exec("conda activate showyourwork_at_$RUNNER_NAME_from_$GITHUB_REF_NAME")
+  }
+
   if (CACHE_CONDA) {
+    if (typeof CONDA_PREFIX === "string" && CONDA_PREFIX.length > 0) {
+      conda_paths.push(CONDA_PREFIX);
+    }
     // Restore conda cache
     core.startGroup("Restore conda cache");
     const conda_cacheKey = await cache.restoreCache(
@@ -39,7 +49,7 @@ async function setupConda() {
   }
 
   // Download and setup conda
-  if (!shell.test("-d", "~/.conda")) {
+  if (CONDA_PREFIX.length === 0 && !shell.test("-d", "~/.conda")) {
     exec(
       "wget --no-verbose https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ./conda.sh", 
       "Download conda"
@@ -65,6 +75,9 @@ async function setupConda() {
 
   // Save conda cache (failure OK)
   if (CACHE_CONDA) {
+    if (typeof CONDA_PREFIX === "string" && CONDA_PREFIX.length > 0) {
+      conda_paths.push(CONDA_PREFIX);
+    }
     try {
       core.startGroup("Update conda cache");
       const conda_cacheId = await cache.saveCache(conda_paths, conda_key);
@@ -73,4 +86,5 @@ async function setupConda() {
       shell.echo(`WARNING: ${error.message}`);
     }
   }
+
 }
