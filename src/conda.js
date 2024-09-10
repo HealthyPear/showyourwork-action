@@ -50,6 +50,9 @@ async function setupConda() {
     exec("conda install -y pip");
     core.endGroup();
   }
+  else {
+    exec("echo 'INFO: a conda installation seems to already present at $CONDA_PREFIX.'");
+  }
 
   // Install showyourwork
   exec(`which conda`, "Check if conda is available and from where");
