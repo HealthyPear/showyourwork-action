@@ -6,6 +6,10 @@ runs:
   using: "node16"
   main: "src/index.js"
 inputs:
+  conda-installation-path:
+    description: "Path to an existing installation of conda on a self-hosted runner"
+    required: false
+    default: ""
   conda-cache-number:
     description: "Bump this number to reset the conda cache"
     required: false
