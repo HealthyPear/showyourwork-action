@@ -33,6 +33,9 @@ async function setupConda() {
     exec("conda create --name showyourwork_at_$RUNNER_NAME_from_$GITHUB_REF_NAME python=3.10 pip")
     exec("conda activate showyourwork_at_$RUNNER_NAME_from_$GITHUB_REF_NAME")
   }
+  else {
+    exec("echo 'INFO: conda-installation-path undefined or not a non-empty string.'")
+  }
 
   if (CACHE_CONDA) {
     if (typeof CONDA_PREFIX === "string" && CONDA_PREFIX.length > 0) {
