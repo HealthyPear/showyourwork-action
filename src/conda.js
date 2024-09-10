@@ -52,6 +52,7 @@ async function setupConda() {
   }
 
   // Install showyourwork
+  exec(`which pip`, "Check which pip installation we are using");
   exec(`pip install -U ${SHOWYOUWORK_SPEC}`, "Install showyourwork");
 
   // Display some info
