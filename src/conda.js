@@ -51,7 +51,7 @@ async function setupConda() {
     core.endGroup();
   }
   else {
-    exec("echo 'INFO: a conda installation seems to already present at $CONDA_PREFIX.'");
+    exec("echo INFO: found conda installation at $CONDA_PREFIX.");
   }
 
   // Install showyourwork
