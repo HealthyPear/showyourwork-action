@@ -31,6 +31,7 @@ async function setupConda() {
   const isSelfHosted = process.env.RUNNER_GROUP === 'self-hosted';
   const runnerName = process.env.RUNNER_NAME || 'Unknown Runner';
 
+  console.log(`Runner group: ${process.env.RUNNER_GROUP}`);
   console.log(`Runner Name: ${runnerName}`);
   console.log(`Self-hosted: ${isSelfHosted}`);
 
