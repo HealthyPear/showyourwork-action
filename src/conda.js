@@ -28,10 +28,11 @@ const CACHE_CONDA = (
  */
 async function setupConda() {
 
+  const runnerGroup = process.env.RUNNER_GROUP;
   const isSelfHosted = runnerGroup === "self-hosted" || runnerGroup === "undefined";
   const runnerName = process.env.RUNNER_NAME || 'Unknown Runner';
 
-  console.log(`Runner group: ${process.env.RUNNER_GROUP}`);
+  console.log(`Runner group: ${runnerGroup}`);
   console.log(`Runner Name: ${runnerName}`);
   console.log(`Self-hosted: ${isSelfHosted}`);
 
