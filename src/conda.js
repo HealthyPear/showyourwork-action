@@ -28,6 +28,13 @@ const CACHE_CONDA = (
  */
 async function setupConda() {
 
+  const isSelfHosted = process.env.RUNNER_GROUP === 'self-hosted';
+  const runnerName = process.env.RUNNER_NAME || 'Unknown Runner';
+
+  console.log(`Runner Name: ${runnerName}`);
+  console.log(`Self-hosted: ${isSelfHosted}`);
+
+
   if (typeof CONDA_PREFIX === "string" && CONDA_PREFIX.length > 0) {
     exec("eval '$(${CONDA_PREFIX}/bin/conda shell.bash hook 2> /dev/null)'");
     exec("conda create --name showyourwork_at_$RUNNER_NAME_from_$GITHUB_REF_NAME python=3.10 pip")
