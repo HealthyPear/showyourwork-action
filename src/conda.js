@@ -69,9 +69,10 @@ async function setupConda() {
 
   // Install showyourwork
   exec(`which conda`, "Check if conda is available and from where");
+  exec(`conda info -e`, "List of vailable conda envs");
   // exec(`which mamba`, "Check if mamba is available and from where");
   exec(`which pip`, "Check which pip installation we are using");
-  exec(`pip install -U ${SHOWYOUWORK_SPEC}`, "Install showyourwork");
+  // exec(`pip install -U ${SHOWYOUWORK_SPEC}`, "Install showyourwork");
 
   // Display some info
   exec("conda info", "Conda info");
