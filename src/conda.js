@@ -28,12 +28,14 @@ const CACHE_CONDA = (
  */
 async function setupConda() {
 
-  const isSelfHosted = process.env.RUNNER_GROUP === 'self-hosted';
+  const isSelfHosted = runnerGroup === "self-hosted" || runnerGroup === "undefined";
   const runnerName = process.env.RUNNER_NAME || 'Unknown Runner';
 
   console.log(`Runner group: ${process.env.RUNNER_GROUP}`);
   console.log(`Runner Name: ${runnerName}`);
   console.log(`Self-hosted: ${isSelfHosted}`);
+
+  exec("ls ~", "What is in the home directory?");
 
 
   if (typeof CONDA_PREFIX === "string" && CONDA_PREFIX.length > 0) {
