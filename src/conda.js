@@ -62,7 +62,7 @@ async function setupConda() {
     );
     core.startGroup("Configure conda");
     exec(`conda config --add pkgs_dirs ${condaInstallDir}/conda_pkgs_dir`);
-    exec(`${condaInstallDir}/bin/conda install -y python=3.10pip`, "Install pip");
+    exec(`${condaInstallDir}/bin/conda install -y python<3.11 pip`, "Install pip");
     core.endGroup();
   }
 
