@@ -11,47 +11,27 @@ module.exports = { setupConda };
 // Cache settings
 const CONDA_CACHE_NUMBER = core.getInput("conda-cache-number");
 const SHOWYOUWORK_SPEC = core.getInput("showyourwork-spec");
-const CONDA_PREFIX = core.getInput("conda-installation-path");
 const RUNNER_OS = shell.env["RUNNER_OS"];
+const RUNNER_NAME = shell.env["RUNNER_NAME"];
+const isSelfHosted = (shell.env["RUNNER_GROUP"] === "self-hosted" || shell.env["RUNNER_GROUP"] === "undefined");
+const showYourWorkCondaDir = isSelfHosted
+  ? `${process.cwd()}/showyourwork_conda_installation`
+  : "~/.conda";
+
 const conda_key = `conda-${constants.conda_cache_version}-${RUNNER_OS}-${CONDA_CACHE_NUMBER}`;
 const conda_restoreKeys = [];
-let conda_paths = ["~/.conda", "~/.condarc", "~/conda_pkgs_dir"];
+const conda_paths = isSelfHosted
+  ? [`${showYourWorkCondaDir}/.conda`, `${showYourWorkCondaDir}/condarc`, `${showYourWorkCondaDir}/conda_pkgs_dir`]
+  : ["~/.conda", "~/.condarc", "~/conda_pkgs_dir"];
 
 // We'll cache the article unless the user set the cache number to `null` (or empty).
-const CACHE_CONDA = (
-  !(CONDA_CACHE_NUMBER == null || CONDA_CACHE_NUMBER == "")
-);
+const CACHE_CONDA = !(CONDA_CACHE_NUMBER == null || CONDA_CACHE_NUMBER == "");
 
 /**
  * Setup a conda distribution or restore it from cache.
- *
  */
 async function setupConda() {
-
-  const runnerGroup = process.env.RUNNER_GROUP;
-  const isSelfHosted = runnerGroup === "self-hosted" || runnerGroup === "undefined";
-  const runnerName = process.env.RUNNER_NAME || 'Unknown Runner';
-
-  console.log(`Runner group: ${runnerGroup}`);
-  console.log(`Runner Name: ${runnerName}`);
-  console.log(`Self-hosted: ${isSelfHosted}`);
-
-  exec("ls ~", "What is in the home directory?");
-
-
-  if (typeof CONDA_PREFIX === "string" && CONDA_PREFIX.length > 0) {
-    exec("eval '$(${CONDA_PREFIX}/bin/conda shell.bash hook 2> /dev/null)'");
-    exec("conda create --name showyourwork_at_$RUNNER_NAME_from_$GITHUB_REF_NAME python=3.10 pip")
-    exec("conda activate showyourwork_at_$RUNNER_NAME_from_$GITHUB_REF_NAME")
-  }
-  else {
-    exec("echo 'INFO: conda-installation-path undefined or not a non-empty string.'")
-  }
-
   if (CACHE_CONDA) {
-    if (typeof CONDA_PREFIX === "string" && CONDA_PREFIX.length > 0) {
-      conda_paths.push(CONDA_PREFIX);
-    }
     // Restore conda cache
     core.startGroup("Restore conda cache");
     const conda_cacheKey = await cache.restoreCache(
@@ -62,38 +42,38 @@ async function setupConda() {
     core.endGroup();
   }
 
+  // Conda installation directory
+  const condaInstallDir = isSelfHosted ? `${showYourWorkCondaDir}/.conda` : "~/.conda";
+
   // Download and setup conda
-  if (CONDA_PREFIX.length === 0 && !shell.test("-d", "~/.conda")) {
+  if (!shell.test("-d", condaInstallDir)) {
+    core.info(`Installing Conda to ${condaInstallDir}`);
+    const condaInstaller = `${process.cwd()}/conda.sh`;
     exec(
-      "wget --no-verbose https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ./conda.sh", 
+      `wget --no-verbose https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ${condaInstaller}`,
       "Download conda"
     );
-    exec("bash ./conda.sh -b -p ~/.conda && rm -f ./conda.sh", "Install conda");
+    exec(
+      `bash ${condaInstaller} -b -p ${condaInstallDir} && rm -f ${condaInstaller}`,
+      "Install conda"
+    );
     core.startGroup("Configure conda");
-    exec("conda config --add pkgs_dirs ~/conda_pkgs_dir");
-    exec("conda install -y pip");
+    exec(`conda config --add pkgs_dirs ${condaInstallDir}/conda_pkgs_dir`);
+    exec(`${condaInstallDir}/bin/conda install -y pip`, "Install pip");
     core.endGroup();
   }
-  else {
-    exec("echo INFO: found conda installation at $CONDA_PREFIX.");
-  }
+
+  // Ensure pip from Conda is used
+  const pipPath = `${condaInstallDir}/bin/pip`;
 
   // Install showyourwork
-  exec(`which conda`, "Check if conda is available and from where");
-  exec(`conda info -e`, "List of vailable conda envs");
-  exec(`which python`, "Check which Python we are using");
-  // exec(`which mamba`, "Check if mamba is available and from where");
-  exec(`which pip`, "Check which pip installation we are using");
-  // exec(`pip install -U ${SHOWYOUWORK_SPEC}`, "Install showyourwork");
+  exec(`${pipPath} install -U ${SHOWYOUWORK_SPEC}`, "Install showyourwork");
 
   // Display some info
-  exec("conda info", "Conda info");
+  exec(`${condaInstallDir}/bin/conda info`, "Conda info");
 
   // Save conda cache (failure OK)
   if (CACHE_CONDA) {
-    if (typeof CONDA_PREFIX === "string" && CONDA_PREFIX.length > 0) {
-      conda_paths.push(CONDA_PREFIX);
-    }
     try {
       core.startGroup("Update conda cache");
       const conda_cacheId = await cache.saveCache(conda_paths, conda_key);
@@ -102,5 +82,4 @@ async function setupConda() {
       shell.echo(`WARNING: ${error.message}`);
     }
   }
-
 }
