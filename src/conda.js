@@ -13,8 +13,10 @@ const CONDA_CACHE_NUMBER = core.getInput("conda-cache-number");
 const SHOWYOUWORK_SPEC = core.getInput("showyourwork-spec");
 const RUNNER_OS = shell.env["RUNNER_OS"];
 const RUNNER_NAME = shell.env["RUNNER_NAME"];
+console.log(`RUNNER GROUP: ${shell.env["RUNNER_GROUP"]}`);
 const isSelfHosted = (shell.env["RUNNER_GROUP"] === "self-hosted" || shell.env["RUNNER_GROUP"] === "undefined");
 console.log(`Is this runner a self-hosted runner?: ${isSelfHosted}`);
+console.log(`Working from: ${process.cwd()}`);
 const showYourWorkCondaDir = isSelfHosted
   ? `${process.cwd()}/showyourwork_conda_installation`
   : "~/.conda";
