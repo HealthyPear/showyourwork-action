@@ -14,6 +14,7 @@ const SHOWYOUWORK_SPEC = core.getInput("showyourwork-spec");
 const RUNNER_OS = shell.env["RUNNER_OS"];
 const RUNNER_NAME = shell.env["RUNNER_NAME"];
 const isSelfHosted = (shell.env["RUNNER_GROUP"] === "self-hosted" || shell.env["RUNNER_GROUP"] === "undefined");
+console.log(`Is this runner a self-hosted runner?: ${isSelfHosted}`);
 const showYourWorkCondaDir = isSelfHosted
   ? `${process.cwd()}/showyourwork_conda_installation`
   : "~/.conda";
@@ -59,7 +60,7 @@ async function setupConda() {
     );
     core.startGroup("Configure conda");
     exec(`conda config --add pkgs_dirs ${condaInstallDir}/conda_pkgs_dir`);
-    exec(`${condaInstallDir}/bin/conda install -y pip`, "Install pip");
+    exec(`${condaInstallDir}/bin/conda install -y python=3.10pip`, "Install pip");
     core.endGroup();
   }
 
