@@ -54,10 +54,10 @@ async function setupConda() {
     console.log("Downloading new conda");
     console.log(`Working from: ${process.cwd()}`);
     exec(
-      "wget --no-verbose https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ./conda.sh", 
+      `wget --no-verbose https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ${showYourWorkCondaDir}/conda.sh`, 
       "Download conda"
     );
-    exec(`bash ./conda.sh -b -p ${showYourWorkCondaDir}/.conda && rm -f ./conda.sh`, "Install conda");
+    exec(`bash ${showYourWorkCondaDir}/conda.sh -b -p ${showYourWorkCondaDir}/.conda && rm -f ${showYourWorkCondaDir}/conda.sh`, "Install conda");
     core.startGroup("Configure conda");
     exec(`conda config --add pkgs_dirs ${showYourWorkCondaDir}/conda_pkgs_dir`);
     exec("conda install -y pip");
