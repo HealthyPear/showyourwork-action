@@ -64,6 +64,8 @@ async function setupConda() {
     exec(`conda config --add pkgs_dirs ${condaInstallDir}/conda_pkgs_dir`);
     exec(`${condaInstallDir}/bin/conda install -y python<3.11 pip`, "Install pip");
     core.endGroup();
+  } else {
+    console.log(`condaInstallDir exists already, NOT installing a new conda`);
   }
 
   // Ensure pip from Conda is used
