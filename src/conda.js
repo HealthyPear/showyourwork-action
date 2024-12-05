@@ -51,7 +51,7 @@ async function setupConda() {
   // Download and setup conda
   if (!shell.test("-d", condaInstallDir)) {
     core.info(`Installing Conda to ${condaInstallDir}`);
-    const condaInstaller = `${process.cwd()}/conda.sh`;
+    const condaInstaller = `${condaInstallDir}/conda.sh`;
     exec(
       `wget --no-verbose https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ${condaInstaller}`,
       "Download conda"
